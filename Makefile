@@ -5,4 +5,4 @@ effects-paper.pdf: effects-paper.tex effects-paper.bib
 	pdflatex effects-paper.tex -output-directory=~/Dropbox/Public
 
 clean:
-	rm *.aux *.bbl *.blg *.log
+	rm -f *.aux *.bbl *.blg *.log *.pdf
