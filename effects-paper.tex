@@ -2,6 +2,7 @@
 
 \usepackage[top=2in, bottom=1.5in, left=1.7in, right=1.5in]{geometry}
 
+\usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage{color}
 \usepackage{amsmath}
@@ -30,13 +31,27 @@
 \newcommand{\sem}[1]{\llbracket #1 \rrbracket}
 \newcommand{\intens}[1]{\overline{#1}}
 
+\newcommand{\keyword}[1]{\texttt{#1}}
+\newcommand{\effect}[1]{\textbf{#1}}
+\newcommand{\semdom}[1]{\textbf{#1}}
+\newcommand{\handle}[2]{\keyword{with}\ #1\ \keyword{handle}\ #2}
+
 \def\limp {\mathbin{{-}\mkern-3.5mu{\circ}}}
 
 \title{Algebraic Effects and Handlers \\ in Natural Language Interpretation}
+\author{Jiří Maršík$^1$ \and Maxime Amblard$^1$}
+\date{}
 
 \begin{document}
 
 \maketitle
+
+\begin{center}
+$^1$LORIA, UMR 7503, Université de Lorraine, CNRS, Inria, Campus Scientifique, \\
+F-54506 Vand\oe uvre-lès-Nancy, France
+
+\texttt{\{jiri.marsik, maxime.amblard\}@loria.fr}
+\end{center}
 
 \begin{abstract}
   Phenomena on the syntax-semantics interface of natural languages have been
@@ -47,24 +62,24 @@
   and integrated treatment of different non-compositional phenomena on the
   syntax-semantics interface.
 
-  In this extended abstract, we give an exposition of the framework of
-  algebraic effects and handlers with an eye towards its applicability in
-  computational semantics. We then present some exemplary analyses in the
-  framework: we study the interplay of anaphora and quantification by
-  translating the continuation-based dynamic logic of de Groote into something
-  more resemblant of DRT and we propose a treatment of overt wh-movement which
-  avoids higher-order types in the syntax.
+  In this paper, we give an exposition of the framework of algebraic effects
+  and handlers with an eye towards its applicability in computational
+  semantics. We then present some exemplary analyses in the framework: we
+  study the interplay of anaphora and quantification by translating the
+  continuation-based dynamic logic of de Groote into a more DRT-like theory
+  and we propose a treatment of overt wh-movement which avoids higher-order
+  types in the syntax.
 \end{abstract}
 
-\section{Several Isolated Treatments}
+\section{Introduction}
+\label{sec:motivation}
 
 In the formal study of the syntax-semantics interface, researchers try to
 discover a systematic translation from the syntactic structures of utterances
 to their denotations. This translation is often performed indirectly by
 translating the syntactic structure into a meta-language of semantic
-representations. For the sake of discussion, we rely on this method as
-well. We will be studying the challenges of translating syntactic structures
-to formulas of Church's higher-order logic.
+representations. We will be studying the challenges of translating syntactic
+structures to formulas of Church's higher-order logic.
 
 A systematic account of the syntax-semantics interface should be
 compositional, i.e. the denotations of complex utterances should be functions
@@ -72,57 +87,32 @@ of the utterances' constituents and their manners of composition. In the style
 of abstract categorial grammars, we take our syntactic structures to be
 $\lambda$-terms and we demand that the translation from syntax to semantics be
 a homomorphism. This means that we view the syntactic structure as a program
-and our goal in studying the syntax-semantics interface is to find suitable
-definitions/interpretations for the constructs of the language this program is
-written in. To describe the process of building up and gluing together the
-semantic representation, we will use a meta-language also. The language used
-is often the same as the language of the semantic representations,
-i.e. $\lambda$-calculus, which makes the boundary between the two quite
-blurry.
+and our goal is to find suitable definitions/interpretations for the
+constructs of the language this program is written in. To describe the process
+of building up and gluing together the semantic representation, we will use a
+meta-language also. This language is often the same as the language of the
+semantic representations, i.e. $\lambda$-calculus, which makes the boundary
+between the two quite blurry.
 
 Work in this paradigm has focused on phenomena that seem to defy the widely
 accepted principle of compositionality. We will consider several examples of
-such work now by looking at the case of a ``simple'' transitive verb and the
-different kinds of denotations that semanticists have assigned it to work
-around different problems. Namely, we will focus on in-situ quantification and
-anaphora. However, similar phenomena could also have been demonstrated on
-treatments of implicit arguments \citep{blom2012implicit} or events
-\citep{qian2011event}.
+such work now by looking at the case of a transitive verb. We will focus on
+in-situ quantification and anaphora. However, similar phenomena could also
+have been demonstrated on treatments of implicit arguments
+\citep{blom2012implicit} or events \citep{qian2011event}.
 
-\begin{exe}
-  \ex \label{ex:simple} Mary read \emph{Ulysses}. \\
-  $\textbf{read}(\textbf{Mary}, \textbf{Ulysses})$
-\end{exe}
-
-In example \eqref{ex:simple}, the translation from syntax to semantics is
-trivial. NPs become individuals and transitive verbs become binary relations
-on individuals.
-
-\subsection{In-situ quantification}
+%% \subsection{In-situ quantification}
 
 \begin{exe}
   \ex \label{ex:quantification} Mary read every book. \\
   $\forall x. \textbf{book}(x) \to \textbf{read}(\textbf{Mary}, x)$
 \end{exe}
 
-In deriving the semantic contents of \eqref{ex:quantification}, the universal
-quantifier and implication contributed by the quantificational noun phrase
-scope over, and take as arguments, the contributions of the verb and the
-subject.
+To handle in-situ quantification, the verb is traditionally assigned the
+denotation\footnote{As in Church's Simple Type Theory, we use
+  $\iota$ for the type of individuals and $o$ for the type of propositions.}:
 
-One way to cop out of solving the problem of in-situ quantification is to just
-bend syntax and say that the syntactic structure of \eqref{ex:quantification}
-is in fact the following:
-
-$$
-\textsc{every} \ \textsc{book} \ (\lambda x. \textsc{read} \ \textsc{Mary} \ x)
-$$
-
-However, we can keep the original syntactic structure by changing the
-definition of \textsc{read}, i.e. the way \textsc{read} glues its arguments
-into a semantic representation.\footnote{As in Church's Simple Type Theory, we
-  use $\iota$ for the type of individuals and $o$ for the type of
-  propositions.}
+\vspace{-4mm}
 
 \begin{align*}
   \sem{\textsc{read}} & : ((\iota \to o) \to o) \to ((\iota \to o) \to o) \to
@@ -133,16 +123,15 @@ into a semantic representation.\footnote{As in Church's Simple Type Theory, we
 
 One way to look at this is to say that NPs denote generalized quantifiers
 (type $(\iota \to o) \to o$) and that transitive verbs are relations on
-generalized quantifiers. We can also think of this change as introducing
-control effects (continuations) into our glue language
-\citep{barker2002continuations}. NPs can now have non-local effects on the
+generalized quantifiers. We can also think of this as introducing control
+effects (continuations) into our glue language
+\citep{barker2002continuations}. NPs can have non-local effects on the
 construction of the semantic representation by taking scope over their
-continuations. The new $\sem{\textsc{read}}$ is just the result of
-(selectively) CPS-transforming the previous $\lambda s o. \textbf{read}(s,
-o)$.
+continuations. $\sem{\textsc{read}}$ is the result of (partially)
+CPS-transforming the simple $\lambda s o. \textbf{read}(s, o)$.
 
-\subsection{Anaphora}
-\label{ssec:anaphora}
+%% \subsection{Anaphora}
+%% \label{ssec:anaphora}
 
 \begin{exe}
   \ex \label{ex:anaphora} Mary$_1$ read her$_1$ favorite book. \\
@@ -150,36 +139,38 @@ o)$.
 \end{exe}
 
 In order to interpret \eqref{ex:anaphora}, we need to link the antecedent with
-the anaphoric pronoun since one is not a constituent of the other but the
-semantic representation of the latter is dependent on that of the former. In
-accordance with dynamic semantics \citep{kamp1993discourse}, we can analyze
-this by positing a store into which discourse referents are introduced and
-from which they are later retrieved. This boils down to extending our glue
-language with state. This is the strategy employed in the continuation-based
-dynamic logic of \citet{de2006towards}. The type of NP denotations becomes in
-turn more complex to reflect the fact that NPs can access the current state
-and manipulate their continuations:
+the anaphoric pronoun since the semantic representation of the latter is
+dependent on that of the former. In accordance with dynamic semantics
+\citep{kamp1993discourse}, we can analyze this by positing a store into which
+discourse referents are introduced and from which they are later
+retrieved. This boils down to extending our glue language with state. This is
+the strategy employed in the continuation-based dynamic logic of
+\citet{de2006towards}. The type of NP denotations becomes in turn more complex
+to reflect the fact that NPs can access the current state and manipulate their
+continuations:
+
+\vspace{-1mm}
 
 $$
 \sem{np} = (\iota \to \gamma \to (\gamma \to o) \to o) \to \gamma \to (\gamma
 \to o) \to o
 $$
 
-The first argument (type $\iota \to \gamma \to (\gamma \to o) \to o$) corresponds
-to a continuation delimited by the containing tensed clause, the second
-argument (type $\gamma$) is the context, where we find e.g. the available
-discourse referents, and the third argument (type $\gamma \to o$) corresponds
-to an open-ended discourse-wide continuation. The context is what lets us
-implement anaphora while the two different continuations serve to enforce DRT
-accessibility constraints \citep{kamp1993discourse} (e.g. the universal
+The first argument (type $\iota \to \gamma \to (\gamma \to o) \to o$)
+corresponds to a continuation delimited by the containing tensed clause, the
+second argument (type $\gamma$) is the context, where we find e.g. the
+available discourse referents, and the third argument (type $\gamma \to o$)
+corresponds to an open-ended discourse-wide continuation. $\gamma$ lets us
+access anaphoric state while the two different continuations serve to enforce
+DRT accessibility constraints \citep{kamp1993discourse} (e.g. the universal
 quantifier in \emph{everyone} provides a referent and takes scope only over
 the containing clause while the existential quantifier in \emph{someone}
 scopes over and provides a referent even for following clauses).
 
-What denotation does this theory assign to the transitive verb
-\emph{read}?\footnote{$\bar{o}$, a dynamic proposition, is shorthand for
-  $\gamma \to (\gamma \to o) \to o$, where $\gamma$ is the state, i.e. the
-  referent store, and $\gamma \to o$ is the continuation.}
+The denotation this theory assigns to the transitive verb
+is:\footnote{$\bar{o}$, a dynamic proposition, is shorthand for $\gamma \to
+  (\gamma \to o) \to o$, where $\gamma$ is the state, i.e. the referent store,
+  and $\gamma \to o$ is the continuation.}
 
 \begin{align*}
   \sem{\textsc{read}} & : \sem{np} \to \sem{np} \to \sem{s} \\
@@ -195,39 +186,16 @@ What denotation does this theory assign to the transitive verb
   \phi. \textbf{read}(x, y) \land \phi e))
 \end{align*}
 
-Again, we can interpret the theory several ways. One can say that
-\textsc{read} has now become a dynamic relation on generalized dynamic
-quantifiers. We also propose another view. Instead of considering the dynamic
-proposition $\bar{o}$ as a semantic representation, we can see it as an
-effectful computation\footnote{In a sense similar to the notions of
-  computation of \citet{moggi1991notions} , popularized as the monads of
-  functional programming.}, that accesses some anaphoric state and manipulates
-continuations, to produce a term of type $o$, the final semantic
-representation.
+We interpret the theory several ways. One can say that \textsc{read} is a
+dynamic relation ($\alpha \to \beta \to \bar{o}$) on generalized dynamic
+quantifiers (type $(\iota \to \bar{o}) \to \bar{o}$). We also hold another
+view: instead of considering the dynamic proposition $\bar{o}$ as a semantic
+representation, we see it as an effectful computation\footnote{In a sense
+  similar to the notions of computation of \citet{moggi1991notions},
+  popularized as the monads of functional programming.} that accesses some
+anaphoric state and manipulates continuations to produce a term of type $o$,
+the final semantic representation.
 
-%% \subsection{Implicit Arguments}
-
-%% \begin{exe}
-%%   \ex \label{ex:implicit} Mary read. \\
-%%   $\exists x. \textbf{read}(\textbf{Mary}, x)$
-%% \end{exe}
-
-
-
-%% \subsection{Event Arguments}
-
-%% \begin{exe}
-%%   \ex \label{ex:event} Mary read \emph{Ulysses} with pleasure. \\
-%%   $\exists e. \textbf{read}(e, \textbf{Mary}, \textbf{Ulysses}) \land \textbf{with-pleasure}(e)$
-%% \end{exe}
-
-
-%% \begin{exe}
-%%   \ex \label{ex:presupposition} If Mary has a cat, she reads \emph{Ulysses} to
-%%   her cat. \\
-%%   $\forall x. (\textbf{cat}(x) \land \textbf{has}(\textbf{Mary}, x)) \to (\textbf{reads}(\textbf{Mary})$
-%%   \ex \label{ex:complicated} Mary would gladly re-read all her favorite books in her garden, if she actually had one.
-%% \end{exe}
 
 \section{Computation on the Syntax-Semantics Frontier}
 
@@ -243,8 +211,8 @@ environment-dependence, respectively.
 Our chief motivation is to unite the treatments presented in the previous
 section and to start formalizing the interactions between the phenomena
 treated therein. Since effects are an intensely-studied topic in formal
-semantics of programming languages and calculi, it would be convenient to
-employ a glue language equipped with some notion of effects.
+semantics of programming languages, it would be convenient to employ a glue
+language equipped with some notion of effects.
 
 Choosing a language with some fixed set of side effects (such as some
 general-purpose programming language) would not be practical since as we have
@@ -261,22 +229,22 @@ out that combining different monads is a difficult problem which still lacks a
 satisfying solution (see references in \cite{shan2002monads} and
 \citet{kammar2013handlers}).
 
-A compelling alternative to the use of monads to describe effects has gained
-popularity recently (\citet{bauer2012programming}, \citet{kammar2013handlers},
-\citet{kiselyov2013extensible}). This new approach is rooted in the algebraic
-study of effects and handlers by \citet{plotkin2009handlers} that builds on
-the notion of Lawvere theory, which provides a category-theoretical take on
-universal algebra different from the one offered by monads
-\citep{hyland2007category}. In our paper, we argue that algebraic effects can
-solve some of our problems in combining multiple effects in a single glue
-language and that the dual notion, handlers, can be identified in existing
-linguistic treatments and is a natural fit for our task.
+A compelling alternative to the use of monads for describing effects has
+gained popularity recently (\citet{bauer2012programming},
+\citet{kammar2013handlers}, \citet{kiselyov2013extensible}). This new approach
+is rooted in the algebraic study of effects and handlers by
+\citet{plotkin2009handlers} that builds on the notion of Lawvere theory, which
+provides a category-theoretical take on universal algebra different from the
+one offered by monads \citep{hyland2007category}. We argue that algebraic
+effects can solve some of our problems in combining multiple effects in a
+single glue language and that the dual notion, handlers, can be identified in
+existing linguistic treatments and is a natural fit for our task.
 
 
 \section{The Case for Effects and Handlers}
 
 In the algebraic effects framework, we use a calculus with abstract effectful
-operations as language primitives. \citep{kammar2013handlers}
+operations as language primitives \citep{kammar2013handlers}.
 
 \begin{prooftree}
   \AxiomC{$(op : A \to B) \in E$}
@@ -286,9 +254,9 @@ operations as language primitives. \citep{kammar2013handlers}
 \end{prooftree}
 
 We take $op$ to be an abstract operation with argument type $A$ and result
-type $B$. We can then invoke this operation by providing it with an argument
-of the correct type and a continuation which will receive the result of the
-operation and carry out the rest of the computation.
+type $B$. We can invoke $op$ by providing it with an argument of the correct
+type and a continuation which will receive the result of the operation and
+carry out the rest of the computation.
 
 What is of note in the above judgments is the $E$ subscript. Typing judgments
 for computations not only serve to prove that a computation will finish by
@@ -346,11 +314,11 @@ can have. This is in contrast with the monadic approach, where both the result
 type and the effect meet in a single type, with the monad functor being
 applied to the result type.
 
-Let us take the example of a computation of result type $\alpha$ that accesses
-some state of type $\gamma$. In the effects framework, this computation would
-have type $\alpha_{\left\{get : 1 \to \gamma, put : \gamma \to 1\right\}}$
-where $get$ and $put$ are the abstract operations used to read from and write
-to the state. In the monadic framework, this computation would be rendered as
+As an example, let us take a computation of result type $\alpha$ that accesses
+state of type $\gamma$. In the effects framework, this computation would have
+type $\alpha_{\left\{get : 1 \to \gamma, put : \gamma \to 1\right\}}$ where
+$get$ and $put$ are the abstract operations used to read from and write to the
+state. In the monadic framework, this computation would be rendered as
 $State_\gamma(\alpha)$ which is equal to $\gamma \to \alpha \times \gamma$.
 
 If we then consider extending this computation to include, e.g., exceptions,
@@ -420,10 +388,10 @@ continues by either evaluating $C_1$ or $C_2$. This formulation in terms of
 algebraic operations on computations is what gave this framework the name
 ``algebraic effects''.
 
-In light of this algebraic view, it becomes easy to explain handlers. A
-handler can be seen as a homomorphism which maps the computation it handles to
-another computation by instantiating certain abstract operations within
-\citep{plotkin2009handlers} \citep{pretnar2010logic}.
+In this algebraic view, a handler can be seen as a homomorphism which maps the
+computation it handles to another computation by instantiating certain
+abstract operations within \citep{plotkin2009handlers}
+\citep{pretnar2010logic}.
 
 Thinking of handlers as scoped interpretations is instructive. Denotations can
 be written using environment-dependent abstract operations such as ``introduce
@@ -432,13 +400,12 @@ referents'', ``access event under discussion'', ``access salient world'',
 ``scope over the current tensed clause''\ldots
 
 Handlers can then be placed at the appropriate junctions in the syntactic tree
-to give meaning to these abstract operations. For example, lexical items that
-necessitate a fresh DRS (negation, universal quantification) will carry
-handlers for introducing and accessing discourse referents, access to the
-event under discussion might be handled at the edge of a scope domain,
-modality operators would handle references to the salient world and tensed
-clauses will handle the quantifiers' access to their scope to enforce scope
-islands.
+to give meaning to these abstract operations. To give several examples:
+lexical items that necessitate a fresh DRS (negation, universal
+quantification) will carry handlers for introducing and accessing discourse
+referents; tensed clauses will use handlers to enforce quantifier scope
+islands; access to the current event might be handled at the edge of a scope
+domain; and modality operators would handle references to the salient world.
 
 \section{Applications of Effects and Handlers to Computational Semantics}
 
@@ -452,72 +419,127 @@ In \citet{de2006towards}, and in more detail in
 \citet{lebedeva2012expression}, we can see indefinites introducing some
 existential quantifier and adding the variable bound by the quantifier into
 the store as a new discourse referent. In our effects framework, we can think
-of this complex action as an effect, let us call it $fresh$, whose purpose is
-to introduce a new discourse referent at the current point of discourse and
-whose implementation will introduce a quantifier someplace and record the
-referent in some store. This decomposition into an abstract interface (the
-$fresh$ operation which introduces a discourse referent) and specific
-implementations that will realize it (handlers for $fresh$) is pertinent. It
-gives us another way to explain how it is possible that the same indefinite
-expression can sometimes contribute an existential quantifier and sometimes a
-universal one, as is the case with the famous example of donkey sentences
-\citep{kamp1993discourse}.
+of this complex action as an effect, let us call it $\effect{fresh}$, whose
+purpose is to introduce a new discourse referent at the current point of
+discourse and whose implementation will introduce a quantifier someplace and
+record the referent in some store. This decomposition into an abstract
+interface (the $\effect{fresh}$ operation which introduces a discourse
+referent) and specific implementations that will realize it (handlers for
+$\effect{fresh}$) is pertinent. It gives us another way to explain how it is
+possible that the same indefinite expression can sometimes contribute an
+existential quantifier and sometimes a universal one, as is the case with the
+famous example of donkey sentences \citep{kamp1993discourse}.
 
 Besides introducing discourse referents, lexical items in continuation-based
 dynamic logic also access the sum total of the available discourse referents
 to be able to resolve anaphora by choosing a salient antecedent from their
-ranks. We model this feature by an effect, $get$, which simply lets
+ranks. We model this feature by an effect, $\effect{get}$, which lets
 computations access the current contents of the discourse store.
 
 With these two operations in hand, we can start rewriting de Groote's
 continuation-based dynamic logic. In short: the dynamic existential quantifier
-will essentially boil down to a call to $fresh$, dynamic negation will
-introduce a handler (a new DRS) and dynamic conjunction will be simple
-conjunction (with arguments evaluated left-to-right). By doing this, we can
-move the dynamicity of continuation-based dynamic logic into the effects, and
-so instead of having the type $(\iota \to \gamma \to (\gamma \to o) \to o) \to
-\gamma \to (\gamma \to o) \to o$ for NP denotations, we get $(\iota \to o_E)
-\to o_E$ for some set of effects $E$ containing $fresh$ and $get$. Here we see
-that we have really translated the notion of a dynamic proposition ($\bar{o} =
-\gamma \to (\gamma \to o) \to o$) to the notion of an effectful computation of
-a static proposition ($o_E$), as was hinted at in \ref{ssec:anaphora}.
+will essentially boil down to a call to $\effect{fresh}$, dynamic negation
+will introduce a handler (a new DRS) and dynamic conjunction will be simple
+conjunction (with arguments evaluated left-to-right).
 
-The NP denotations now have type $(\iota \to o_E) \to o_E$, something more
-complicated than the naive intuitive $\iota$ one starts with for proper nouns
-and other referring expressions and also something that can be seen as a
-computation of $\iota$ with access to some continuation of result type
-$o_E$. If we look at the denotations, the meaning of this continuation is the
-scope over which quantifiers such as \emph{every} should range. This scope is
-supplied to the NP by the tensed clause it is contained in. If we were to take
-this approach to its logical conclusion, we could turn this into an effect
-too. Quantificational noun phrases could employ a $scope\_over$ effect to
-introduce some quantifier and tensed clauses could be handlers for these
-effects, delimiting the scope of these quantifiers.
+\vspace{-4mm}
+
+\begin{align*}
+  \dexists &= \lambda P. P (\effect{fresh}\ ()) \\
+  \dnot &= \lambda P_t. \{ \lnot (\handle{drs\ (\effect{get}\ ())}{P_t!}) \} \\
+  \dand &= \lambda P_t Q_t. \{ P_t! \land Q_t! \}
+\end{align*}
+
+The fragments we show are faithful excerpts from our experimental grammar. The
+language used is \emph{Eff} \citep{bauer2012programming}. As we are dealing
+with effects, the order of evaluation matters and since \emph{Eff} is
+call-by-value, we use thunks to simulate call-by-name. For those, we adopt the
+notation used in \citet {kammar2013handlers}. $\{ M \}$ is short for $\lambda
+(). M$ (i.e. a dummy abstraction serving to build a thunk) and $M!$ is short
+for $M\ ()$ (i.e. applying a thunk to the dummy unit argument). Furthermore,
+we mark variables that hold thunks with the subscript $t$. The exposition
+could be cleared up by devising a language which separates strictness from
+abstraction, in much the same way as was already proposed by
+\citet{kiselyov2008call}.
+
+We can now move the dynamicity of continuation-based dynamic logic into the
+effects, and so instead of having the type $(\iota \to \gamma \to (\gamma \to
+o) \to o) \to \gamma \to (\gamma \to o) \to o$ for NP denotations, we get
+$(\iota \to o_E) \to o_E$ for some set of effects $E$ containing
+$\effect{fresh}$ and $\effect{get}$.
+
+\vspace{-4mm}
+
+\begin{align*}
+  \sem{\textsc{she}} &= \lambda k. k (sel_{she}' (\effect{get}\ ())) \\
+  \sem{\textsc{something}} &= \lambda k. \dexists x. (k\ x) = \lambda k. k
+  (\effect{fresh}\ ()) \\
+  \sem{\textsc{every}} &= \lambda n k. \dforall x. (\{n\ x\} \dimpl \{k\ x\})! \\
+  \sem{\textsc{read}} &= \lambda S O. S (\lambda s. O (\lambda
+  o. \semdom{read}(s, o)))
+\end{align*}
+
+We have switched from dynamic propositions ($\bar{o} = \gamma \to (\gamma \to
+o) \to o$) to effectful computations of static propositions ($o_E$), as was
+hinted at in Section~\ref{sec:motivation}.
+
+The NP denotations now have type $(\iota \to o_E) \to o_E$. This is still more
+complicated than the naive type $\iota$ one starts with for proper nouns. We
+can see this type as a computation of $\iota$ with access to some continuation
+of result type $o_E$. If we look at the denotations, this continuation (the
+argument $k$) is properly exploited only in the denotation of \emph{every}
+where it serves to mark the scope of the quantifier. This scope is supplied to
+the NP by the tensed clause it is contained in. If we were to take our
+approach to its logical conclusion, we could turn this into an effect as
+well. Quantificational noun phrases could employ a $\effect{scope\_over}$
+effect to introduce some quantifier and tensed clauses could be handlers for
+these effects, delimiting the scope of these quantifiers.
+
+\vspace{-4mm}
+
+\begin{align*}
+  \sem{\textsc{she}} &= \{ sel_{she}' (\effect{get}\ ()) \} \\
+  \sem{\textsc{something}} &= \{ \effect{fresh}\ () \} \\
+  \sem{\textsc{every}} &= \lambda n. \{ \effect{scope\_over}\ (\lambda
+  k. \dforall x. (\{n\ x\} \dimpl \{k\ x\})!) \} \\
+  \sem{\textsc{read}} &= \lambda s_t o_t. \{ \handle{tensed\_clause}{\semdom{read}(s_t!, o_t!)} \}
+\end{align*}
 
 We have now arrived at a type for NP denotations that is $\iota_E$, where $E$
-is some set of effects including $scope\_over$, $get$ and $fresh$, the three
-effects being somewhat analogous to the three arguments that NP denotations
-abstract over in continuation-based dynamic logic. However, this type lacks a
-result of type $o$ and it becomes impossible to express the propositional
-content of NPs, e.g. the restrictor of a quantifier contributed by a noun
-combined with a determiner. The fact that NPs assert some propositional
-content as well as evaluate to some variable for individuals ($\iota$) can be
-modelled by another effect, $assert$. The $assert$ effect is handled by the
-same handler as $fresh$ and $get$, i.e. by a DRS.
+is some set of effects including $\effect{scope\_over}$, $\effect{get}$ and
+$\effect{fresh}$, the three effects being somewhat analogous to the three
+arguments that NP denotations abstract over in continuation-based dynamic
+logic. For now, we have restricted our set of effects that NPs can use to
+modify the current DRS to just $\effect{fresh}$, which lets us only introduce
+new referents. However, indefinite expressions such as \emph{a good book} not
+only introduce referents but also assert something about them. We can model
+this by admitting a new effect, $\effect{assert}$, that will be handled by the
+same handler as $\effect{fresh}$ and $\effect{get}$, i.e. by a DRS.
 
-We have therefore arrived at the following system with two kinds of
-handlers. We have DRSs as handlers that handle three effects that can be seen
-as the interface of a DRS: we can build up a DRS by introducing new discourse
-referents ($fresh$) and constraints ($assert$) and we can use the information
-stored inside to resolve anaphora ($get$). We also have tensed clauses as
-handlers. They delimit scope islands which define the scopes of the
-quantifiers contained within ($scope\_over$).
+\vspace{-4mm}
+
+\begin{align*}
+  \sem{\textsc{some}} = \lambda n. \{\ 
+    &\keyword{let}\ x = \effect{fresh}\ ()\ \keyword{in} \\
+    &\keyword{let}\ () = \effect{assert}\ (n\ x)\ \keyword{in} \\
+    &x \ \}
+\end{align*}
+
+We have arrived at the following system with two kinds of handlers. We have
+DRSs as handlers that handle three effects that can be seen as the interface
+of a DRS: we can build up a DRS by introducing new discourse referents
+($\effect{fresh}$) and constraints ($\effect{assert}$) and we can use the
+information stored inside to resolve anaphora ($\effect{get}$). We also have
+tensed clauses as handlers. They delimit scope islands which define the scopes
+of the quantifiers contained within ($\effect{scope\_over}$).
 
 \subsection{Overt Movement and Effects}
 
 Overt movement (as in the case of an object extracted from a relative clause
 by a relativizer such as \emph{who}) has in the categorial school been often
 studied as $\lambda$-abstraction or hypothetical reasoning.
+
+\vspace{-3mm}
 
 $$
 \textsc{who} : (np \limp s) \limp n \limp n
@@ -530,14 +552,26 @@ restrictions, especially when it comes to multiple extraction
 
 When we have effects available to us, we can choose an alternative
 solution. Traces can be seen as inaudible NPs whose semantic representation is
-computed through an effectful operation, $move$. A relativizer will then
-handle $move$ events in the relative clause. The handler will be a shallow
-handler \citep{kammar2013handlers}, meaning it will only handle the first
-occurrence of the $move$ event that will occur in the relative clause, which
-gives correct predictions in the case of multiple extraction.
+computed through an effectful operation, $\effect{move}$. A relativizer will
+then handle $\effect{move}$ events in the relative clause. The handler will be
+a shallow handler \citep{kammar2013handlers}, meaning it will only handle the
+first occurrence of the $\effect{move}$ event that will occur in the relative
+clause, which gives correct predictions in the case of multiple extraction.
+
+\vspace{-4mm}
+
+\begin{align*}
+  \sem{\textsc{who}} = \lambda r_t n. \lambda x.\ & \keyword{let}\ r =
+  \handle{extract}{r_t!}\ \keyword{in} \\
+   & (n\ x) \land (r\ x) \\
+\end{align*}
+
+\vspace{-8mm}
+
+\hspace{2.5cm} $ \sem{\epsilon} = \{ \effect{move}\ () \} $ \\
 
 By making the relativizer handler fail in the case that it does not intercept
-any $move$ effect (i.e. the relative clause contained no free trace),
+any $\effect{move}$ effect (i.e. the relative clause contained no free trace),
 sentences with ungrammatical uses of the relativizer can be ruled out. With
 this technique, the type of \textsc{who} becomes $s \limp n \limp n$, which is
 interesting because using 2nd order types, such as this one, in the syntax
@@ -547,11 +581,11 @@ makes it possible to use efficient parsing algorithms
 
 \section{Conclusion}
 
-In this extended abstract, we gave a short exposition to the theory of
-algebraic effects and handlers and demonstrated how it can be applied to
-computational semantics. Besides our principal example of dynamic logic and
-DRT, we also covered extraction. However, that is not the full extent of the
-applicability of effects and handlers. The event argument under discussion
+In this paper, we gave a short exposition to the theory of algebraic effects
+and handlers and demonstrated how it can be applied to computational
+semantics. Besides our principal example of dynamic logic and DRT, we also
+covered extraction. However, that is not the full extent of the applicability
+of effects and handlers. The event argument under discussion
 \citep{qian2011event} and the salient world are both examples of dynamic
 binding, which is a special case of a handler. \citet{lebedeva2012expression}
 proposes modeling presuppositions and proper names using exceptions, which are
@@ -568,9 +602,7 @@ be found in existing literature (e.g. \citet{kiselyov2013extensible},
 
 For future work, we are interested in developing a simple calculus with
 effects and a notion of evaluation order suitable for the study of the
-syntax-semantics interface (up until now, experiments were done in \emph{Eff}
-\citep{bauer2012programming} and the extensible effects Haskell library of
-\citet{kiselyov2013extensible}). Having fixed such a calculus, we would aim to
+syntax-semantics interface. Having fixed such a calculus, we would aim to
 study non-compositional semantic phenomena in concert, not in isolation, and
 to examine their interactions.
 
