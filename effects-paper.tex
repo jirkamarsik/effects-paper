@@ -14,11 +14,11 @@
 \usepackage{bussproofs}
 
 
-\newcommand{\dand}{\mathbin{\bar{\land}}}
-\newcommand{\dnot}{\mathop{\bar{\lnot}}}
-\newcommand{\dimpl}{\mathbin{\bar{\to}}}
-\newcommand{\dexists}{\mathop{\bar{\exists}}}
-\newcommand{\dforall}{\mathop{\bar{\forall}}}
+\newcommand{\dand}{\mathbin{\overline{\land}}}
+\newcommand{\dnot}{\mathop{\overline{\lnot}}}
+\newcommand{\dimpl}{\mathbin{\overline{\to}}}
+\newcommand{\dexists}{\mathop{\overline{\exists}}}
+\newcommand{\dforall}{\mathop{\overline{\forall}}}
 
 \newcommand{\hsbind}{\mathbin{\texttt{>>=}}}
 \newcommand{\hsrevbind}{\mathbin{\texttt{=<<}}}
@@ -168,15 +168,15 @@ the containing clause while the existential quantifier in \emph{someone}
 scopes over and provides a referent even for following clauses).
 
 The denotation this theory assigns to the transitive verb
-is:\footnote{$\bar{o}$, a dynamic proposition, is shorthand for $\gamma \to
-  (\gamma \to o) \to o$, where $\gamma$ is the state, i.e. the referent store,
-  and $\gamma \to o$ is the continuation.}
+is:\footnote{$\overline{o}$, a dynamic proposition, is shorthand for $\gamma
+  \to (\gamma \to o) \to o$, where $\gamma$ is the state, i.e. the referent
+  store, and $\gamma \to o$ is the continuation.}
 
 \begin{align*}
   \sem{\textsc{read}} & : \sem{np} \to \sem{np} \to \sem{s} \\
-  \sem{\textsc{read}} & : ((\iota \to \bar{o}) \to \bar{o}) \to
-                          ((\iota \to \bar{o}) \to \bar{o}) \to
-                          \bar{o} \\
+  \sem{\textsc{read}} & : ((\iota \to \overline{o}) \to \overline{o}) \to
+                          ((\iota \to \overline{o}) \to \overline{o}) \to
+                          \overline{o} \\
   \sem{\textsc{read}} & : ((\iota \to \gamma \to (\gamma \to o) \to o)
                            \to \gamma \to (\gamma \to o) \to o) \\ & \to
                           ((\iota \to \gamma \to (\gamma \to o) \to o)
@@ -187,11 +187,11 @@ is:\footnote{$\bar{o}$, a dynamic proposition, is shorthand for $\gamma \to
 \end{align*}
 
 We interpret the theory several ways. One can say that \textsc{read} is a
-dynamic relation ($\alpha \to \beta \to \bar{o}$) on generalized dynamic
-quantifiers (type $(\iota \to \bar{o}) \to \bar{o}$). We also hold another
-view: instead of considering the dynamic proposition $\bar{o}$ as a semantic
-representation, we see it as an effectful computation\footnote{In a sense
-  similar to the notions of computation of \citet{moggi1991notions},
+dynamic relation ($\alpha \to \beta \to \overline{o}$) on generalized dynamic
+quantifiers (type $(\iota \to \overline{o}) \to \overline{o}$). We also hold
+another view: instead of considering the dynamic proposition $\overline{o}$ as
+a semantic representation, we see it as an effectful computation\footnote{In a
+  sense similar to the notions of computation of \citet{moggi1991notions},
   popularized as the monads of functional programming.} that accesses some
 anaphoric state and manipulates continuations to produce a term of type $o$,
 the final semantic representation.
@@ -479,9 +479,9 @@ $\effect{fresh}$ and $\effect{get}$.
   o. \semdom{read}(s, o)))
 \end{align*}
 
-We have switched from dynamic propositions ($\bar{o} = \gamma \to (\gamma \to
-o) \to o$) to effectful computations of static propositions ($o_E$), as was
-hinted at in Section~\ref{sec:motivation}.
+We have switched from dynamic propositions ($\overline{o} = \gamma \to (\gamma
+\to o) \to o$) to effectful computations of static propositions ($o_E$), as
+was hinted at in Section~\ref{sec:motivation}.
 
 The NP denotations now have type $(\iota \to o_E) \to o_E$. This is still more
 complicated than the naive type $\iota$ one starts with for proper nouns. We
