@@ -77,7 +77,7 @@ F-54506 Vand\oe uvre-lès-Nancy, France
 In the formal study of the syntax-semantics interface, researchers try to
 discover a systematic translation from the syntactic structures of utterances
 to their denotations. This translation is often performed indirectly by
-translating the syntactic structure into a meta-language of semantic
+translating the syntactic structures into a meta-language of semantic
 representations. We will be studying the challenges of translating syntactic
 structures to formulas of Church's higher-order logic.
 
@@ -163,14 +163,14 @@ available discourse referents, and the third argument (type $\gamma \to o$)
 corresponds to an open-ended discourse-wide continuation. $\gamma$ lets us
 access anaphoric state while the two different continuations serve to enforce
 DRT accessibility constraints \citep{kamp1993discourse} (e.g. the universal
-quantifier in \emph{everyone} provides a referent and takes scope only over
-the containing clause while the existential quantifier in \emph{someone}
-scopes over and provides a referent even for following clauses).
+quantifier in \emph{everyone} provides a referent for and takes scope over
+only its containing clause while the existential quantifier in \emph{someone}
+provides a referent for and scopes over even following clauses).
 
 The denotation this theory assigns to the transitive verb
 is:\footnote{$\overline{o}$, a dynamic proposition, is shorthand for $\gamma
-  \to (\gamma \to o) \to o$, where $\gamma$ is the state, i.e. the referent
-  store, and $\gamma \to o$ is the continuation.}
+  \to (\gamma \to o) \to o$, where $\gamma$ is the anaphoric state, i.e. the
+  referent store, and $\gamma \to o$ is the continuation.}
 
 \begin{align*}
   \sem{\textsc{read}} & : \sem{np} \to \sem{np} \to \sem{s} \\
@@ -216,7 +216,7 @@ language equipped with some notion of effects.
 
 Choosing a language with some fixed set of side effects (such as some
 general-purpose programming language) would not be practical since as we have
-seen, new treatments of discovered phenomena usually rely on new effects. We
+seen, treatments of newly discovered phenomena often call on new effects. We
 would therefore prefer a framework that allows us to abstract over the
 different effects in our glue language.
 
@@ -311,7 +311,7 @@ to the prevalent monadic approach.
 First of all, the types of computations are decomposed into two components:
 the type of the value being computed and the set of effects the computation
 can have. This is in contrast with the monadic approach, where both the result
-type and the effect meet in a single type, with the monad functor being
+type and the effects meet in a single type, with the monad functor being
 applied to the result type.
 
 As an example, let us take a computation of result type $\alpha$ that accesses
