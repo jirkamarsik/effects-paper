@@ -247,10 +247,10 @@ In the algebraic effects framework, we use a calculus with abstract effectful
 operations as language primitives \citep{kammar2013handlers}.
 
 \begin{prooftree}
-  \AxiomC{$(op : A \to B) \in E$}
+  \AxiomC{$(\effect{op} : A \to B) \in E$}
   \AxiomC{$\Gamma \vdash V : A$}
   \AxiomC{$\Gamma, x : B \vdash_E M : C$}
-  \TrinaryInfC{$\Gamma \vdash_E op\ V (\lambda x. M) : C$}
+  \TrinaryInfC{$\Gamma \vdash_E \effect{op}\ V\ (\lambda x. M) : C$}
 \end{prooftree}
 
 We take $op$ to be an abstract operation with argument type $A$ and result
@@ -302,7 +302,7 @@ $C$ exhibiting effects $E$. \citep{bauer2012programming}
 \citep{kiselyov2013extensible}
 
 $$
-\sem{C_E} = C + \sum_{(op : A \to B) \in E} A \times \sem{C_E}^B
+\sem{C_E} = C + \sum_{(\effect{op} : A \to B) \in E} A \times \sem{C_E}^B
 $$
 
 We can start appreciating some enticing features of this system in comparison
