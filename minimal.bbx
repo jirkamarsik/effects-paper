@@ -1,0 +1,19 @@
+\ProvidesFile{minimal.bbx}[A minimal BiBLaTeX style]
+
+\RequireBibliographyStyle{authoryear}
+
+\DeclareBibliographyDriver{article}{
+  \printnames{author}
+  \newblock
+  (\printfield{year})
+  \newunit\newblock
+  \printfield{title}
+  \finentry}
+
+\DeclareBibliographyDriver{inproceedings}{
+  \printnames{author}
+  \newblock
+  (\printfield{year})
+  \newunit\newblock
+  \printfield{title}
+  \finentry}

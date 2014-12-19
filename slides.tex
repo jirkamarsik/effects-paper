@@ -1,0 +1,463 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{pgfpages}
+\usepackage{stmaryrd}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{bussproofs}
+
+\hypersetup{pdfstartview={Fit}}
+\def\limp {\mathbin{{-}\mkern-3.5mu{\circ}}}
+
+
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}
+  {\hfill {\normalsize \insertframenumber{}/\inserttotalframenumber{}}}
+
+  
+\newcommand{\hastype}{\mathop{:}}
+
+\newcommand{\dand}{\mathbin{\overline{\land}}}
+\newcommand{\dnot}{\mathop{\overline{\lnot}}}
+\newcommand{\dimpl}{\mathbin{\overline{\to}}}
+\newcommand{\dexists}{\mathop{\overline{\exists}}}
+\newcommand{\dforall}{\mathop{\overline{\forall}}}
+
+\newcommand{\hsbind}{\mathbin{\texttt{>>=}}}
+\newcommand{\hsrevbind}{\mathbin{\texttt{=<<}}}
+\newcommand{\hsseq}{\mathbin{\texttt{>>}}}
+\newcommand{\occons}{\mathbin{::}}
+
+\newcommand{\statecps}[3]{\llbracket #3 \rrbracket^{#2}_{#1}}
+\newcommand{\cps}[2]{\llbracket #2 \rrbracket^{#1}}
+
+\newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+\newcommand{\intens}[1]{\overline{#1}}
+
+\newcommand{\obj}[1]{\text{Obj}(#1)}
+\newcommand{\inl}[1]{\text{inl}(#1)}
+\newcommand{\inr}[1]{\text{inr}(#1)}
+\newcommand{\id}[1]{\text{id}_{#1}}
+
+\newcommand{\keyword}[1]{\texttt{#1}}
+\newcommand{\effect}[1]{\textbf{#1}}
+\newcommand{\semdom}[1]{\textbf{#1}}
+\newcommand{\handle}[2]{\keyword{with}\ #1\ \keyword{handle}\ #2}
+
+
+\newcommand{\highlight}[2]{\colorbox{#1}{$\displaystyle #2$}}
+
+
+\setbeamercolor{block title}{fg=ngreen,bg=white} % Colors of the block titles
+\setbeamercolor{block body}{fg=black,bg=white} % Colors of the body of blocks
+\setbeamercolor{block alerted title}{fg=white,bg=dblue!70} % Colors of the highlighted block titles
+\setbeamercolor{block alerted body}{fg=black,bg=dblue!10} % Colors of the body of highlighted blocks
+% Many more colors are available for use in beamerthemeconfposter.sty
+
+
+
+
+\usepackage[backend=biber, bibstyle=minimal, citestyle=authoryear-comp]{biblatex}
+\addbibresource{effects-paper.bib}
+
+
+\begin{document}
+
+\title[Effects \& Handlers in Semantics]{Algebraic Effects and Handlers \\
+  in Natural Language Interpretation}
+\author{Jiří Maršík and Maxime Amblard}
+\institute[LORIA, Université de Lorraine, Inria]
+{
+  LORIA, UMR 7503, Université de Lorraine, CNRS, Inria, Campus Scientifique, \\
+  F-54506 Vand\oe uvre-lès-Nancy, France
+}
+\date[July 2014]{July 17, 2014}
+
+\frame{\titlepage \setcounter{framenumber}{1}}
+
+
+\begin{frame} \frametitle{Objectives}
+
+\begin{enumerate}
+\item Detailed semantics for a large-scale grammar of a natural language
+  \vfill
+\item Capturing the interactions of non-local (i.e. non-compositional)
+  semantic phenomena
+  \begin{itemize}
+    \item anaphora
+    \item in-situ quantification
+    \item event arguments
+    \item presupposition
+    \item intensionalization
+    \item extraction
+    \item \ldots
+  \end{itemize}
+  \vfill
+\item Multiple semantic phenomena in a single treatment without overly
+  complicated types and terms
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{In-situ quantification}
+  \framesubtitle{\textcite{barker2002continuations}}
+
+  \label{ex:quantification} Mary read every book. \\
+  $\forall x. \semdom{book}(x) \to \semdom{read}(\semdom{Mary}, x)$
+
+  \begin{align*}
+  \sem{s}  &= o \\
+  \sem{np} &= (\iota \to o) \to o
+  \end{align*}
+
+  \begin{align*}
+  \sem{\textsc{read}} & : \sem{np} \to \sem{np} \to \sem{s} \\
+  \sem{\textsc{read}} & : ((\iota \to o) \to o) \to ((\iota \to o) \to o) \to
+  o \\
+  \sem{\textsc{read}} & = \lambda s o. s (\lambda x. o (\lambda
+  y. \textbf{read}(x, y)))
+  \end{align*}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Anaphora}
+  \framesubtitle{\textcite{de2006towards}}
+
+  \label{ex:anaphora} Mary$_1$ read her$_1$ favorite book. \\
+  $\semdom{read}(\semdom{Mary}, \semdom{favorite-book}(\semdom{Mary}))$
+
+  \vspace{-2mm}
+
+  \begin{align*}
+  \sem{s}  &= \overline{o} \\
+           &= \gamma \to (\gamma \to o) \to o \\
+  \sem{np} &= (\iota \to \overline{o}) \to \overline{o} \\
+           &= (\iota \to \gamma \to (\gamma \to o) \to o) \to \gamma \to (\gamma \to o) \to o
+  \end{align*}
+
+  \vspace{-3mm}
+
+  \begin{align*}
+  \sem{\textsc{read}} & : \sem{np} \to \sem{np} \to \sem{s} \\
+  \sem{\textsc{read}} & : ((\iota \to \overline{o}) \to \overline{o}) \to
+                          ((\iota \to \overline{o}) \to \overline{o}) \to
+                          \overline{o} \\
+  \sem{\textsc{read}} & : ((\iota \to \gamma \to (\gamma \to o) \to o)
+                           \to \gamma \to (\gamma \to o) \to o) \\ & \to
+                          ((\iota \to \gamma \to (\gamma \to o) \to o)
+                           \to \gamma \to (\gamma \to o) \to o) \\ & \to
+                           \gamma \to (\gamma \to o) \to o \\
+  \sem{\textsc{read}} & = \lambda s o. s (\lambda x. o (\lambda y e
+  \phi. \textbf{read}(x, y) \land \phi e))
+  \end{align*}
+
+\end{frame}
+
+
+
+
+\begin{frame} \frametitle{Motivation}
+
+  \vfill
+\begin{itemize}
+\item non-local phenomena + compositionality = generalizing meaning (often by
+  abstracting over some new parameter)
+  \vfill
+\item more non-local phenomena $\Rightarrow$ more parameters $\Rightarrow$
+  more complexity
+  \vfill
+\item most research focuses on single phenomena
+\end{itemize}
+  \vfill
+
+\end{frame}
+ 
+
+
+\begin{frame} \frametitle{Effects in Interpretation}
+\vfill
+\begin{center}
+  semantic generalizations $\approx$ monads
+\end{center}
+\vspace{-7mm}
+\begin{flushright}
+  \parencite{shan2002monads}
+\end{flushright}
+
+\vfill
+
+\begin{center}
+  Montague's PTQ $\approx$ evaluation order + continuations
+\end{center}
+\vspace{-7mm}
+\begin{flushright}
+  \parencite{barker2002continuations}
+\end{flushright}
+
+\vfill
+
+\begin{center}
+  non-local phenomena $\approx$ computational effects \\
+  $\Rightarrow$ elegant explanation of their interactions
+\end{center}
+\vspace{-7mm}
+\begin{flushright}
+  \parencite{shan2005linguistic, kiselyov2008call}
+\end{flushright}
+\vfill
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Effects and Handlers}
+  \framesubtitle{Introduction}
+
+\begin{itemize}
+\item Effectful operation: throws an exception containing the supplied
+  argument and the current continuation
+  \vfill
+\item Handlers: capture the exceptions to implement the operations
+  \begin{itemize}
+  \item e.g. just by applying the continuation to some result
+  \end{itemize}
+  \vfill
+\item Type-and-effect system: like Java's checked exceptions
+\end{itemize}
+\vfill
+\begin{prooftree}
+  \AxiomC{$(\effect{op} : A \to B) \in E$}
+  \AxiomC{$\Gamma \vdash V : A$}
+  \AxiomC{$\Gamma, x : B \vdash_E M : C$}
+  \TrinaryInfC{$\Gamma \vdash_E \effect{op}\ V\ (\lambda x. M) : C$}
+\end{prooftree}
+  
+\begin{flushright}
+  \parencite{kammar2013handlers}
+\end{flushright}
+\end{frame}
+
+\begin{frame}
+\frametitle{Effects and Handlers}
+\framesubtitle{Advantages}
+
+\begin{itemize}
+\item Easier to combine multiple effects in a single semantics
+  \parencite{cartwright1994extensible} \parencite{kiselyov2013extensible}
+\end{itemize}
+\vspace{6mm}
+$$
+\sem{C_E} = C + \sum_{(\effect{op} : A \to B) \in E} A \times \sem{C_E}^B
+$$
+\vspace{2mm}
+\begin{center}
+\setlength{\tabcolsep}{1pt}
+\begin{tabular}{r c l}
+  ``effects + handlers'' & : & ``delimited continuations'' \\
+  & = & \\
+  ``while'' & : & ``goto''
+\end{tabular}
+\end{center}
+\begin{flushright}
+  \parencite{bauer2012programming}
+\end{flushright}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Translating Dynamic Logic}
+  \framesubtitle{Effects and Handlers}
+\begin{itemize}
+\item Effectful operations
+  \begin{align*}
+    \effect{get} &: 1 \to \gamma^{\{\effect{get}\}} \\
+    \effect{fresh} &: 1 \to \iota^{\{\effect{fresh}\}} \\
+    \effect{assert} &: o \to 1^{\{\effect{assert}\}} \\
+    \effect{scope\_over} &: ((\iota \to o) \to o) \to \iota^{\{\effect{scope\_over}\}} \\
+    \effect{move} &: 1 \to \iota^{\{\effect{move}\}}
+  \end{align*}
+
+\item Handlers
+  \begin{align*}
+    drs &: \gamma \to (o^{\{\effect{get}; \effect{fresh}; \effect{assert}|\rho\}} \Rightarrow o^{\rho}) \\
+    tensed\_clause &: o^{\{\effect{scope\_over}|\rho\}} \Rightarrow o^{\rho} \\
+    extract &: \alpha^{\{\effect{move}|\rho\}} \Rightarrow (\iota \to \alpha^{\rho})
+  \end{align*}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Translating Dynamic Logic}
+\framesubtitle{Logical Connectives}
+\vspace{-4mm}
+\begin{align*}
+  \onslide<1->{\dexists P &= \lambda e \phi. \exists x. P x (x \occons e) \phi \\}
+  \onslide<2->{\dexists P &= P\ (\effect{fresh}\ ()) \\[3mm]}
+  \onslide<1->{\dnot A &= \lambda e \phi. \lnot (A e (\lambda e'. \top)) \land \phi e \\}
+  \onslide<2->{\dnot A &= \lnot (\handle{drs\ (\effect{get}\ ())}{A}) \\[3mm]}
+  \onslide<1->{A \dand B &= \lambda e \phi. A e (\lambda e'. B e' \phi) \\}
+  \onslide<2->{A \dand B &= A \land B \\[6mm]}
+  \onslide<3>{A \dimpl B &= \dnot (A \dand \dnot B) \\}
+  \onslide<3>{\dforall P &= \dnot \dexists x. \dnot P x}
+\end{align*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Translating Dynamic Logic}
+\framesubtitle{Lexical Items}
+\vspace{-5mm}
+\begin{align*}
+  \onslide<1->{\sem{\textsc{she}} &= \lambda k e \phi. k (sel_{she} (e)) e \phi \\}
+  \onslide<2->{\sem{\textsc{she}} &= \lambda k. k (sel_{she} (\effect{get}\ ())) \\}
+  \onslide<3>{\sem{\textsc{she}} &= \{ sel_{she} (\effect{get}\ ()) \} \\[2mm]}
+  \onslide<1->{\sem{\textsc{something}} &= \lambda k. \dexists x. (k\ x) = \lambda k e \phi.\ \exists x. k x (x \occons e) \phi \\}
+  \onslide<2->{\sem{\textsc{something}} &= \lambda k. \dexists x. (k\ x) = \lambda k. k (\effect{fresh}\ ()) \\}
+  \onslide<3>{\sem{\textsc{something}} &= \{ \effect{fresh}\ () \} \\[2mm]}
+  \onslide<1->{\sem{\textsc{every}} &= \lambda n k. \dforall x. (n\ x) \dimpl (k\ x) \\}
+  \onslide<2->{\sem{\textsc{every}} &= \lambda n k. \dforall x. (n\ x) \dimpl (k\ x) \\}
+  \onslide<3>{\sem{\textsc{every}} &= \lambda n. \{ \effect{scope\_over}\ (\lambda k. \dforall x. (n\ x) \dimpl (k\ x)) \} \\[2mm]}
+  \onslide<1->{\sem{\textsc{read}} &= \lambda S O. S (\lambda s. O (\lambda o e \phi. \semdom{read}(s, o) \land \phi e)) \\}
+  \onslide<2->{\sem{\textsc{read}} &= \lambda S O. S (\lambda s. O (\lambda o. \semdom{read}(s, o))) \\}
+  \onslide<3>{\sem{\textsc{read}} &= \lambda s_t o_t. \{ \handle{tensed\_clause}{\semdom{read}(s_t!, o_t!)} \}}
+\end{align*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Translating Dynamic Logic}
+\framesubtitle{Lexical Items (cont'd)}
+
+\begin{center}
+\setlength{\tabcolsep}{1pt}
+\begin{tabular}{r l}
+   \onslide<1->{$\sem{\textsc{some}}$ & $= \lambda n k. \dexists x. (n\ x) \dand (k\ x)$ \\[1mm]}
+   \onslide<2->{$\sem{\textsc{some}}$ & $= \lambda n k. \dexists x. (n\ x) \land (k\ x)$ \\[0.5mm]
+      & $= \lambda n k. k ($
+     \begin{tabular}[t]{l}
+       $\keyword{let}\ x = \effect{fresh}\ ()\ \keyword{in}$ \\
+       $\keyword{let}\ () = \effect{assert}\ (n\ x)\ \keyword{in}$ \\
+       $x\ )$
+     \end{tabular} \\[1mm]}
+
+    \onslide<3>{$\sem{\textsc{some}}$ & $=\lambda n. \{\ \effect{scope\_over}\ (\lambda k. \dexists x. (n\ x) \land (k\ x))\ \}$ \\[0.5mm]
+     & $= \lambda n. \{$
+     \begin{tabular}[t]{l}
+       $\keyword{let}\ x = \effect{fresh}\ ()\ \keyword{in}$ \\
+       $\keyword{let}\ () = \effect{assert}\ (n\ x)\ \keyword{in}$ \\
+       $x\ \}$
+     \end{tabular} \\}
+   \\[2mm]
+   \onslide<1->{$\sem{\textsc{who}}$ & $= \lambda r n x. n x \dand r (\lambda k. k x)$ \\[1mm]}
+   \onslide<2->{$\sem{\textsc{who}}$ & $= \lambda r n x. n x \land r (\lambda k. k x)$ \\[1mm]}
+   \onslide<3>{$\sem{\textsc{who}}$ & $= \lambda r n x. n x \land r x$}
+\end{tabular}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Treating Extraction as an Effect}
+
+\begin{center}
+ \setlength{\tabcolsep}{1pt}
+ \begin{tabular}{r l}
+  $\sem{\textsc{who}}$ & $: \sem{s}^{\{\effect{move}|\rho\}} \to \sem{n} \to \sem{n}^{\rho}$ \\[1mm]
+  $\sem{\textsc{who}}$ & $= \lambda r_t n. \lambda x.$
+   \begin{tabular}[t]{l}
+     $\keyword{let}\ r = \handle{extract}{r_t!}\ \keyword{in}$ \\
+     $(n\ x) \land (r\ x)$
+   \end{tabular} \\
+   \\
+ & \begin{tabular}{r l}
+  $r_t$ & $: o^{\{\effect{move}|\rho\}}$ \\
+  $r$ & $: \iota \to o^{\rho}$ \\
+  $n$ & $: \iota \to o$ \\
+  $x$ & $: \iota$
+   \end{tabular} \\
+   \\[4mm]
+  $\sem{\epsilon}$ & $: \sem{np}^{\{\effect{move}\}}$ \\[1mm]
+  $\sem{\epsilon}$ & $= \{ \effect{move}\ () \} $
+  \end{tabular}
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Example - Syntax}
+  \framesubtitle{Every farmer who owns a donkey beats it.}
+  \includegraphics[width=\textwidth]{syntax2.pdf}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Example - Semantics}
+  \framesubtitle{Every farmer who owns a donkey beats it.}
+  \includegraphics[width=\textwidth]{semantics.pdf}
+\end{frame}
+
+
+\begin{frame} \frametitle{Conclusion}
+
+\vfill
+We have:
+\vfill
+\begin{itemize}
+\item motivated the use of algebraic effects and handlers in semantics.
+  \vfill
+\item translated de Groote's continuation-based dynamic logic
+  \parencite{de2006towards} to effects, reconstructing notions from DRT.
+  \vfill
+\item treated extraction as an effect in interpretation instead of using
+  hypothetical reasoning and lambda abstractions in the syntax.
+\end{itemize}
+\vfill
+
+\end{frame}
+
+
+\begin{frame} \frametitle{Future Work}
+
+\vfill
+We would like to:
+\vfill
+\begin{itemize}
+\item show how effects and handlers apply to the other non-local phenomena
+  (presupposition, event arguments, optional items, intensionalization).
+  \vfill
+\item build a fragment that combines all of these.
+  \vfill
+\item design a calculus with algebraic effects and handlers and a suitable
+  evaluation order (CBV vs CBN).
+\end{itemize}
+\vfill
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thank You}
+  \vfill
+  \begin{center}
+    Questions?
+  \end{center}
+  \vfill
+  \begin{center}
+    Would you like to know more?
+
+    \vspace{6mm}
+
+    \scriptsize{\url{http://jirka.marsik.me/research/algebraic-effects-and-handlers-in-natural-language-interpretation}}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{References}
+  \footnotesize{\printbibliography}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,108 @@
+diff --git a/effects-paper.tex b/effects-paper.tex
+index f628b08..b792d7d 100644
+--- a/effects-paper.tex
++++ b/effects-paper.tex
+@@ -14,11 +14,11 @@
+ \usepackage{bussproofs}
+ 
+ 
+-\newcommand{\dand}{\mathbin{\bar{\land}}}
+-\newcommand{\dnot}{\mathop{\bar{\lnot}}}
+-\newcommand{\dimpl}{\mathbin{\bar{\to}}}
+-\newcommand{\dexists}{\mathop{\bar{\exists}}}
+-\newcommand{\dforall}{\mathop{\bar{\forall}}}
++\newcommand{\dand}{\mathbin{\overline{\land}}}
++\newcommand{\dnot}{\mathop{\overline{\lnot}}}
++\newcommand{\dimpl}{\mathbin{\overline{\to}}}
++\newcommand{\dexists}{\mathop{\overline{\exists}}}
++\newcommand{\dforall}{\mathop{\overline{\forall}}}
+ 
+ \newcommand{\hsbind}{\mathbin{\texttt{>>=}}}
+ \newcommand{\hsrevbind}{\mathbin{\texttt{=<<}}}
+@@ -77,7 +77,7 @@ F-54506 Vand\oe uvre-lès-Nancy, France
+ In the formal study of the syntax-semantics interface, researchers try to
+ discover a systematic translation from the syntactic structures of utterances
+ to their denotations. This translation is often performed indirectly by
+-translating the syntactic structure into a meta-language of semantic
++translating the syntactic structures into a meta-language of semantic
+ representations. We will be studying the challenges of translating syntactic
+ structures to formulas of Church's higher-order logic.
+ 
+@@ -163,20 +163,20 @@ available discourse referents, and the third argument (type $\gamma \to o$)
+ corresponds to an open-ended discourse-wide continuation. $\gamma$ lets us
+ access anaphoric state while the two different continuations serve to enforce
+ DRT accessibility constraints \citep{kamp1993discourse} (e.g. the universal
+-quantifier in \emph{everyone} provides a referent and takes scope only over
+-the containing clause while the existential quantifier in \emph{someone}
+-scopes over and provides a referent even for following clauses).
++quantifier in \emph{everyone} provides a referent for and takes scope over
++only its containing clause while the existential quantifier in \emph{someone}
++provides a referent for and scopes over even following clauses).
+ 
+ The denotation this theory assigns to the transitive verb
+-is:\footnote{$\bar{o}$, a dynamic proposition, is shorthand for $\gamma \to
+-  (\gamma \to o) \to o$, where $\gamma$ is the state, i.e. the referent store,
+-  and $\gamma \to o$ is the continuation.}
++is:\footnote{$\overline{o}$, a dynamic proposition, is shorthand for $\gamma
++  \to (\gamma \to o) \to o$, where $\gamma$ is the anaphoric state, i.e. the
++  referent store, and $\gamma \to o$ is the continuation.}
+ 
+ \begin{align*}
+   \sem{\textsc{read}} & : \sem{np} \to \sem{np} \to \sem{s} \\
+-  \sem{\textsc{read}} & : ((\iota \to \bar{o}) \to \bar{o}) \to
+-                          ((\iota \to \bar{o}) \to \bar{o}) \to
+-                          \bar{o} \\
++  \sem{\textsc{read}} & : ((\iota \to \overline{o}) \to \overline{o}) \to
++                          ((\iota \to \overline{o}) \to \overline{o}) \to
++                          \overline{o} \\
+   \sem{\textsc{read}} & : ((\iota \to \gamma \to (\gamma \to o) \to o)
+                            \to \gamma \to (\gamma \to o) \to o) \\ & \to
+                           ((\iota \to \gamma \to (\gamma \to o) \to o)
+@@ -187,11 +187,11 @@ is:\footnote{$\bar{o}$, a dynamic proposition, is shorthand for $\gamma \to
+ \end{align*}
+ 
+ We interpret the theory several ways. One can say that \textsc{read} is a
+-dynamic relation ($\alpha \to \beta \to \bar{o}$) on generalized dynamic
+-quantifiers (type $(\iota \to \bar{o}) \to \bar{o}$). We also hold another
+-view: instead of considering the dynamic proposition $\bar{o}$ as a semantic
+-representation, we see it as an effectful computation\footnote{In a sense
+-  similar to the notions of computation of \citet{moggi1991notions},
++dynamic relation ($\alpha \to \beta \to \overline{o}$) on generalized dynamic
++quantifiers (type $(\iota \to \overline{o}) \to \overline{o}$). We also hold
++another view: instead of considering the dynamic proposition $\overline{o}$ as
++a semantic representation, we see it as an effectful computation\footnote{In a
++  sense similar to the notions of computation of \citet{moggi1991notions},
+   popularized as the monads of functional programming.} that accesses some
+ anaphoric state and manipulates continuations to produce a term of type $o$,
+ the final semantic representation.
+@@ -216,7 +216,7 @@ language equipped with some notion of effects.
+ 
+ Choosing a language with some fixed set of side effects (such as some
+ general-purpose programming language) would not be practical since as we have
+-seen, new treatments of discovered phenomena usually rely on new effects. We
++seen, treatments of newly discovered phenomena often call on new effects. We
+ would therefore prefer a framework that allows us to abstract over the
+ different effects in our glue language.
+ 
+@@ -311,7 +311,7 @@ to the prevalent monadic approach.
+ First of all, the types of computations are decomposed into two components:
+ the type of the value being computed and the set of effects the computation
+ can have. This is in contrast with the monadic approach, where both the result
+-type and the effect meet in a single type, with the monad functor being
++type and the effects meet in a single type, with the monad functor being
+ applied to the result type.
+ 
+ As an example, let us take a computation of result type $\alpha$ that accesses
+@@ -479,9 +479,9 @@ $\effect{fresh}$ and $\effect{get}$.
+   o. \semdom{read}(s, o)))
+ \end{align*}
+ 
+-We have switched from dynamic propositions ($\bar{o} = \gamma \to (\gamma \to
+-o) \to o$) to effectful computations of static propositions ($o_E$), as was
+-hinted at in Section~\ref{sec:motivation}.
++We have switched from dynamic propositions ($\overline{o} = \gamma \to (\gamma
++\to o) \to o$) to effectful computations of static propositions ($o_E$), as
++was hinted at in Section~\ref{sec:motivation}.
+ 
+ The NP denotations now have type $(\iota \to o_E) \to o_E$. This is still more
+ complicated than the naive type $\iota$ one starts with for proper nouns. We

@@ -1,6 +1,4 @@
-\documentclass{article}
-
-\usepackage[top=2in, bottom=1.5in, left=1.7in, right=1.5in]{geometry}
+\documentclass[a4paper,11pt]{easychair}
 
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
@@ -39,19 +37,19 @@
 \def\limp {\mathbin{{-}\mkern-3.5mu{\circ}}}
 
 \title{Algebraic Effects and Handlers \\ in Natural Language Interpretation}
-\author{Jiří Maršík$^1$ \and Maxime Amblard$^1$}
-\date{}
+\author{Jiří Maršík \and Maxime Amblard}
+
+\institute{LORIA, UMR 7503, Université de Lorraine, CNRS, Inria, Campus Scientifique, \\
+F-54506 Vand\oe uvre-lès-Nancy, France \\
+\email{\{jiri.marsik, maxime.amblard\}@loria.fr}}
+
+\titlerunning{Effects and Handlers in Natural Language}
+\authorrunning{Maršík and Amblard}
+\pagestyle{empty}
 
 \begin{document}
 
 \maketitle
-
-\begin{center}
-$^1$LORIA, UMR 7503, Université de Lorraine, CNRS, Inria, Campus Scientifique, \\
-F-54506 Vand\oe uvre-lès-Nancy, France
-
-\texttt{\{jiri.marsik, maxime.amblard\}@loria.fr}
-\end{center}
 
 \begin{abstract}
   Phenomena on the syntax-semantics interface of natural languages have been
@@ -60,15 +58,14 @@ F-54506 Vand\oe uvre-lès-Nancy, France
   able to profit from recent development in the study of effects. We propose
   adopting algebraic effects and handlers as tools for facilitating a uniform
   and integrated treatment of different non-compositional phenomena on the
-  syntax-semantics interface.
-
+  syntax-semantics interface. \par
   In this paper, we give an exposition of the framework of algebraic effects
   and handlers with an eye towards its applicability in computational
   semantics. We then present some exemplary analyses in the framework: we
   study the interplay of anaphora and quantification by translating the
   continuation-based dynamic logic of de Groote into a more DRT-like theory
   and we propose a treatment of overt wh-movement which avoids higher-order
-  types in the syntax.
+  types in the syntax. \par
 \end{abstract}
 
 \section{Introduction}

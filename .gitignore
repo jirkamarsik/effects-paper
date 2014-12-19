@@ -7,4 +7,5 @@
 *.out
 *.pdf
 *.snm
+*.toc
 *.run.xml
